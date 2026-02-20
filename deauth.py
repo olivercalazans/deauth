@@ -1,3 +1,4 @@
+import re
 import struct
 import sys
 import time
@@ -22,6 +23,7 @@ class Deauthenticator:
     def execute(self):
         try:
             self._parse_arguemnts()
+            self._validate_arguments()
             self._build_frames()
             self._create_socket()
             self._display_exec_info()
@@ -56,6 +58,22 @@ class Deauthenticator:
             Deauthenticator._abort('Missing arguments')
         
         return sys.argv[1:]
+    
+
+
+    def _validate_arguments(self):
+        self._validate_mac_addr(self._args.target)
+        self._validate_mac_addr(self._args.bssid)
+    
+
+
+    @staticmethod
+    def _validate_mac_addr(mac: str):
+        parts = mac.split(':')
+
+        if len(parts) != 6 or not re.match(r'^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$', mac):
+            Deauthenticator._abort(f'Invalid MAC address: {mac}')
+        
 
 
     
@@ -142,8 +160,6 @@ class Deauthenticator:
             if shots >= 128:
                 shots = 0
                 time.sleep(0.3)
-
-
 
 
 
