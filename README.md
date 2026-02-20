@@ -1,5 +1,5 @@
 <h1 align="center"> Deauthenticator </h1>
-A script to perform the Deauthentication attack. Only using Python and its standard libs.
+<h4 align="center"> A script to perform the Deauthentication attack </h4>
 
 
 
@@ -15,6 +15,7 @@ A script to perform the Deauthentication attack. Only using Python and its stand
 
 
 ## Installation
+No installation is necessary. Just download and run the script.
 ```bash
 # Clone this repo (or download the script)
 git clone https://github.com/olivercalazans/deauth.git
