@@ -1,10 +1,45 @@
 <h1 align="center"> Deauthenticator </h1>
-A script to perform the Deauthentication attack
+A script to perform the Deauthentication attack. Only using Python and its standard libs.
 
 
 
 <br><br>
 
+
+## Dependencies
+- **This code only works on Linux.**
+- Python 3.10 or higher **(No external lib is necessary)**
+
+
+<br>
+
+
+## Installation
+```bash
+# Clone this repo (or download the script)
+git clone https://github.com/olivercalazans/deauth.git
+
+# Change to the directory
+cd deauth
+
+# Give execution permission, if necessary
+chmod +x deauth.py
+```
+
+
+<br>
+
+
+## How to use
+```bash
+# Example
+sudo python3 deauth.py -i wlp2s0 -t 11:22:33:44:55:66 -b 66:55:44:33:22:11
+```
+> [!WARNING]
+> You need to set the channel and change the interface mode to monitor mode **MANUALLY**.
+
+
+<br>
 
 
 ## Legal and ethical use warning
