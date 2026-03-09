@@ -26,7 +26,6 @@ class Deauthenticator:
             self._build_frames()
             self._create_socket()
             self._display_exec_info()
-            self._flush_unnecessary_data()
             self._send_endlessly()
         except KeyboardInterrupt:
             print('\nExecution interrupted by the user')
@@ -73,7 +72,6 @@ class Deauthenticator:
         if len(parts) != 6 or not re.match(r'^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$', mac):
             Deauthenticator._abort(f'Invalid MAC address: {mac}')
         
-
 
     
     def _build_frames(self):
@@ -138,11 +136,6 @@ class Deauthenticator:
         print(f'IFACE....: {self._args.iface}')
         print(f'TARGET...: {self._args.target}')
         print(f'BSSID....: {self._args.bssid}')
-
-
-    
-    def _flush_unnecessary_data(self):
-        self._args = None
 
     
 
